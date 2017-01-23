@@ -322,6 +322,34 @@ We should add:
         <scope>provided</scope>
 </dependency>
 
+The code:
+1. The index.jsp contains a link to our resource, i.e webapi/myresource. On clicking on the link, we make a REST request and get the REST response.
+2. The servlet which gives us the response is org.glassfish.jersey.servlet.ServletContainer. Look into web.xml
+3. This servlet is mapped using the URL pattern /webapi/*. Hence any request like /webapi/some_resource will be handled by the Jersey servlet ServletContainer.
+4. The servlet does not really know how to handle the request. To handle the resource, we must explicitly tell Jersey where the packages are, so that it can get the appropriate class to handle the request.
+
+Creating our own Resource:
+1. Our resource (messages) is mapped using a POJO MessageResource.java which should be placed either in the package defined in the web.xml or in a sub-package.
+2. The class name should be annoated with @Path("messages")
+3. A method returning a String is annotated with the appropriate HTTP method, i.e @GET. 
+Hence when the user requests for http://localhost:8080/001_First_Jersey_Project/webapi/messages, a String is returned as the requested Resource.
+
+Examples of resources:
+/webapi/messages/20
+/webapi/profiles/yovan
+/webai/messages/20/comments/7
+
+Steps to create a REST Resource using jersey
+1. Create a Jersey webapp using Maven
+The Jersey servlet, init-param package and URL pattern is set for us. This is easily modified.
+2.  Create a new Resource class under the package or subpackage defined in web.xml, i.e the class should be in the package configured in Jersey's servlet's init-param.
+3. Add a method in the class that returns the resource.
+4. Annotate the class with the @Path("messages") annotation
+5. Annoate the method with the right HTTP method annotation.
+6, Annotate the method with @Produces(MediaType.TEXT_PLAIN) specifying the response format.
+MediaType is an enumeration which contains the media types that an HTTP request may return.
+
+
 
 
 
