@@ -1,0 +1,7 @@
+A. 
+1. See how to create a webapp using Maven
+2. Add Jersey and Hibernate dependencies and Servlet provided.
+3. Create a REST API using Hibernate
+4. See how to  build and deploy on Tomcat Server.
+5. See Remote Debugging.
+

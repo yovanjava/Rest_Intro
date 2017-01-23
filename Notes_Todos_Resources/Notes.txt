@@ -1,0 +1,330 @@
+Developing RESTful APIs using the JAX-RS technology
+===============================================
+We should learn two main things:
+1. Concepts and best practices of  RESTful services
+2. Imlementation of RESTful services using JAX-RS
+
+We sill be developing a Messenger - Social media application API.
+
+What are webservices?
+Webservices are services exposed on the web to be accessed programmatically -  they are APIs that we can access through our code.
+
+Methods of different APIs hosted on different machines are accessed by our programs. For example games can update our walls on Facebook. 
+They use the Facebook and Twitter APIs to perform CRUD operations on the Facebook database.
+
+RESTful services share barebone data in XML or JSON format. Developers parse the data to be used in their code.
+RESTful services are light-weight and use the HTTP protocol.
+
+Characterics of RESTful services
+1. Use HTTP methods explicitly. There are no protocols. Data can be transtered as text, JSON or XML.
+2. Be stateless.
+3. Expose directory structure-like URIs. Resource Locations contain only the core data. - Resouce based URIs. For example weatherapp.com/zipCode/12345.
+4. Transfer XML, JavaScript Object Notation (JSON), or both.
+
+Data is transfered in Hypertext - text containing hyperlinks.
+
+GET  - used to retrieve data
+POST  - used to submit data to the server
+PUT - used to update data on the server
+DELETE - Remove data on the server
+HEAD – Retrieve meta-information without the response body
+PATCH - Make partial modifications to resources
+OPTIONS - Returns the allowed methods for the resource
+
+Metadata: Status code and header responses are examle of metadata of the HTTP response.
+200 - Success
+500 - Error
+404 - Resource Not found
+
+All responses and requests must have the right headers, for examle for content negotitation, i.e what content type of the data should be returned as response.
+
+Designing RESTful services - Requests
+------------------------------------------------------------------
+We will be building a Messenger app. Users can 
+ - Post messages
+- Comment  like  and share messages
+- Create and modify their profiles
+
+We want to design Resource based URIs for CRUD operations.
+for example /profiles/{profileName} => /profiles/yovan
+
+- URIS contain Nouns and not verbs. These nouns are the the Resources themselves.
+- The resources are plurals
+- The resources are directory based, i.e they feel like independent of the underlying technology.
+- Resources may be dependant on other resources. For example comments on a post is dependant on the post (message).
+/profiles/{profileName}
+/messages/{messageId}/comments/{commentId} => /messages/1/comments/2
+/messages/{messageId}/likes/{likeId} 
+messages/{messageId}/shares/{shareId}
+
+messages and profiles are first level entities
+Comments, likes and shares are second level entities relative to messages.
+
+RESTful URIs belong to two types - instance resource URIs and collection resource URIs.
+Instance resource URIs return a single entity:
+/profiles/{profileName}
+/messages/{messageId}/comments/{commentId} => /messages/1/comments/2
+/messages/{messageId}/likes/{likeId} 
+messages/{messageId}/shares/{shareId}
+
+Collection resource URIs return a collection of instance resources:
+/messages
+/messages/1/comments
+/profiles
+
+Query parameters are used to filter collection resources. An examle is pagination.
+/messages?offset=30&limit=10
+/messages?year=2014
+/messages?year=2014&offset=30&limit=10
+
+HTTP methods GET POST PUT and DELETE methods are used against the resource URIs to perform CRUD operations.
+GET /messages/20
+PUT /messages/20 will update the message. The content is sent in the request body.
+DELETE /messages/20
+POST /messages will create a new message. The content to be created is sent in the request body.
+DELETE /messages/10/comments deletes all comments related to message id 10
+PUT /messages/10/comments will update all the comments related to message id 10.
+
+
+Idempotence in HTTP methods
+--------------------------------------------------------
+GET is a read-only methods and PUT, POST and DELETE are write methods.
+No matter how many times we run the GET request, there will be no change on the server.
+GET methods are safe requests.
+DELETE is also a safe method as nothing is changed if the DELETE method is run on the same resource.
+DELETE messages/10 
+PUT same as DELETE is safe when repeated.
+
+POST is not safe as if we run several POST method will create a new resource on the server if the method is run several times on the server.
+
+GET, PUT and DELETE are idempotent methods - safetly repeatable.
+POST is non-idempotent.
+
+This is why new resources should always be created using POST method.
+
+Caches for GET methods are done on servers. Hence retrieving data should only be used to GET.
+If we post a data through a form in the browser and hit the browser button, the browser warns us that we are submitting data once again, so that we do not create duplicate data.
+
+Response
+--------------
+REST - Representational State Transfer 
+With REST, the response can be in different formats, stated by the client, for example the same API can return JSON or XML.
+We have a different representation of the data, hence the Representational part in the name.
+
+The response contains
+- The response body 
+- The headers
++ Message length
++ content type
++ Date
+
+The content type in the header will tell the client how to parse the data - as JSON or XML.
+
+The first line of the response is the status code which will give information to the browser whether the request was successful.
+1XX - Informational codes => Acknowledgement codes
+2XX - Success codes for example  200 OK, 201 Created, 204 No Content (for example for delete request)
+3XX - Redirection codes - 302 Found, 304 Not Modified, 307 Temorary Redirect
+4XX - Client error - These error codes are return if the client did an error- 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 415 Unsupported Media Type
+5XX - Server error - Something went wrong on the server - 500 Internal Server Error
+
+Important: The programmer must send the appropriate status codes while sending the response.
+
+Examples - To be implemented by programmer :
+-----------------------------------------------------------------------------------
+GET /messages/{messageId}
+200 Success
+404 Not Found
+500 Failure
+
+DELETE /messages/{messageId}
+200 or 204 Success or No content
+404 Not Found
+500 Failure
+
+PUT /messages/{messageId}
+200 Success
+400 or 415 Wrong format or wrong data
+404 Not Found
+500 Failure
+
+PUT /messages/{messageId}
+201 Success Created
+400 or 415 Wrong format or wrong data
+500 Failure
+
+HATEOS - Hypermedia As The Engine Of Application State
+-----------------------------------------------------------------------------------------------------
+HATEOS is a way to provide links to resources in the response, so that the client does not have to deal  with URL construction.
+
+Suppose we want to access the message with id 20. The response from the server is below:
+{
+	"id": "20",
+       	"message": "Hello World!",
+	"date": "01 Jan 2017",
+	"author": "Yovan",
+	"commentsUri": "api/messages/20/comments",
+	"likesUri": "api/messages/20/likes",
+	"sharesUri": "api/messages/20/shares",
+	"authorProfileUris": "api/profiles/yovan"
+}
+
+The returned Uris can themselves return resources with more Uris.
+Hence the response is Hypermedia which enables our client  application to drive the application state.
+ 
+For example if we want all the messages we can use GET /messages.
+Suppose after getting the list of messages we would like to display links to update existing messages.
+We can use HATEOS to provide a link in our response to each message resource.
+
+[{
+	"id": "1",
+	"message": "Hello World!",
+	"created": "2017-01-01T12:00:00.000",
+	"author": "yovan",
+	"href": "/messages/1"
+},
+{
+	"id": "2",
+	"message": "Bazinga!",
+	"created": "2017-01-01T12:00:00.000",
+	"author": "john",
+	"href": "/messages/2"
+},
+{
+	"id": "3",
+	"message": "Hello World!",
+	"created": "2017-01-01T12:00:00.000",
+	"author": "yovan",
+	"href": "/messages/3"
+}
+]
+
+This ensures that the client does not have to construct a URI for retrieving a particular message.
+
+
+We can extend our response to contain comments, likes, shares, profile and link to post a new comment.
+An example is:
+[
+{
+	"id": "1",
+	"message": "Hello World!",
+	"created": "2017-01-01T12:00:00.000",
+	"author": "yovan",
+	"href": "/messages/1",
+	"likes-href": "api/messages/20/likes",
+	"shares-href": "api/messages/20/shares",
+	"profile-href": "api/profiles/yovan",
+	"comment-post-href": "/messages/1/comments"
+},
+
+.....
+
+]
+
+As we can see, this can become very messy. 
+Also the client  will have to remember all the property names for the URIs, which is cumbersome.
+
+The rel attribute can be used to add extra information for our links.
+Analogously we have rel in link HTML tags, href gives us the path to the resource and rel="stylesheet" tells the browser the relation between the resource and the HTML document, i.e it is a stylesheet.
+
+[
+{
+	"id": "1",
+	"message": "Hello World!",
+	"created": "2017-01-01T12:00:00.000",
+	"author": "yovan",
+	"links":  [
+		{
+			"href": "/messages/1",
+			"rel": "self"
+		},
+		{
+			"href": "/messages/1/comments",
+			"rel": "comments"
+		},
+		{
+			"href": "/messages/1/likes",
+			"rel": "likes"
+		},
+		{
+			"href": "/messages/1/shares",
+			"rel": "shares"
+		},
+		{
+			"href": "/messages/1/yovan",
+			"rel": "author"
+		},
+	]
+},
+
+.....
+
+]
+
+Now the client does not have to remember the URI names - it simply has to get the approriate rel value and the corresponding href.
+ 
+The Richardson Maturity Model
+-------------------------------------------------------
+There are 4 levels to define how RESTful an API is. - Level 0 (not RESTful) - Level 3 (Fully RESTful).
+
+In SOAP based webservices, there is only one end point, i.e only one URL.
+The request body contains all the details so that the server knows which particular method to run.
+For example to create a message => /message
+...
+<create-message>
+	<message-content>Hello World!</message-content>
+	<message-author>yovan</message-author>
+</create-message>
+
+To delete a message =>  /message
+...
+<delete-comment>
+	<message-id>30</message-id>
+	<comment-id>2</comment-id>
+</delete-comment>
+...
+
+The above is Level O - Swam of POX (Plain Old XML) - no use of HTTP construct.
+
+If we use individual URIs for each resource - Level 1.
+/messages
+/profiles
+/comments
+/likes etc
+
+Level 2 - If we use the right HTTP methods and status codes to perform the right operations on our resources.
+
+Level 3 - Responses implement HATEOS, i.e the responses have links that the clients can use.
+APIs implenting HATEOS are considered as fully RESTful.
+
+Java RESTful libraries implement the JAX-RS API. Hence we can use any library.
+JAX-RS is a bunch of interfaces and annotations. 
+LIbraries implement classes that implement the JAX-RS specification. All libraries implementing JAX-RS already contain the JAX-RS interfaces and annotations, hence we don't have to include them in our code.
+We will use Jersey as it is a reference implementation for the JAX-RS specification.
+
+Code
+=======
+Maven is used to create a new Maven Jersey Project.
+We have to choose the jersey-quickstart-webapp archetype id. If we do not have this archetype registered, we must add a new archetype
+Archetye Group id: org.glassfish.jersey.archetypes
+Archetype Artifact id: jersey-quickstart-webapp
+Archetype-version: 2.25.1
+
+After the project has been created, we deploy it (Right Click->Run on server).
+On the index page, there is a link to a Jersey Resource created for us which prints out Got it!
+http://localhost:8080/001_First_Jersey_Project/webapi/myresource.
+By clicking on the link we made a REST API request and Got it! is a REST API response.
+
+We should add:
+<dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.0.1</version>
+        <scope>provided</scope>
+</dependency>
+
+
+
+
+
+
+
