@@ -349,6 +349,13 @@ The Jersey servlet, init-param package and URL pattern is set for us. This is ea
 6, Annotate the method with @Produces(MediaType.TEXT_PLAIN) specifying the response format.
 MediaType is an enumeration which contains the media types that an HTTP request may return.
 
+Our messages Resource should return a list of messages. 
+We will create a mock Service and a model class. We won't  use a database, but we'll mock the data.
+We change the content-type of the response to XML -> @Produces(MediaType.APPLICATION_XML)
+But we get an error while we try to get the messages resources:
+SEVERE: MessageBodyWriter not found for media type=application/xml, type=class java.util.ArrayList, genericType=java.util.List<com.yovan.firstjerseyproject.model.Message>.
+The conversion is done by JAXB, which comes bundled with Java. But JAXB needs more information to perform the conversion.
+=> Annotate the class with @XMLRootElement
 
 
 
