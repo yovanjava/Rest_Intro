@@ -2,20 +2,20 @@ Developing RESTful APIs using the JAX-RS technology
 ===============================================
 We should learn two main things:
 1. Concepts and best practices of  RESTful services
-2. Imlementation of RESTful services using JAX-RS
+2. Implementation of RESTful services using JAX-RS
 
 We sill be developing a Messenger - Social media application API.
 
-What are webservices?
-Webservices are services exposed on the web to be accessed programmatically -  they are APIs that we can access through our code.
+What are web services?
+Web services are services exposed on the web to be accessed programmatically -  they are APIs that we can access through our code.
 
 Methods of different APIs hosted on different machines are accessed by our programs. For example games can update our walls on Facebook. 
-They use the Facebook and Twitter APIs to perform CRUD operations on the Facebook database.
+They use the FaceBook and Twitter APIs to perform CRUD operations on the Facebook database.
 
-RESTful services share barebone data in XML or JSON format. Developers parse the data to be used in their code.
+RESTful services share bare-bone data in XML or JSON format. Developers parse the data to be used in their code.
 RESTful services are light-weight and use the HTTP protocol.
 
-Characterics of RESTful services
+Characteristics of RESTful services
 1. Use HTTP methods explicitly. There are no protocols. Data can be transtered as text, JSON or XML.
 2. Be stateless.
 3. Expose directory structure-like URIs. Resource Locations contain only the core data. - Resouce based URIs. For example weatherapp.com/zipCode/12345.
@@ -51,7 +51,7 @@ for example /profiles/{profileName} => /profiles/yovan
 - URIS contain Nouns and not verbs. These nouns are the the Resources themselves.
 - The resources are plurals
 - The resources are directory based, i.e they feel like independent of the underlying technology.
-- Resources may be dependant on other resources. For example comments on a post is dependant on the post (message).
+- Resources may be dependent on other resources. For example comments on a post is dependant on the post (message).
 /profiles/{profileName}
 /messages/{messageId}/comments/{commentId} => /messages/1/comments/2
 /messages/{messageId}/likes/{likeId} 
@@ -294,7 +294,7 @@ If we use individual URIs for each resource - Level 1.
 Level 2 - If we use the right HTTP methods and status codes to perform the right operations on our resources.
 
 Level 3 - Responses implement HATEOS, i.e the responses have links that the clients can use.
-APIs implenting HATEOS are considered as fully RESTful.
+APIs implementing HATEOS are considered as fully RESTful.
 
 Java RESTful libraries implement the JAX-RS API. Hence we can use any library.
 JAX-RS is a bunch of interfaces and annotations. 
@@ -330,7 +330,7 @@ The code:
 
 Creating our own Resource:
 1. Our resource (messages) is mapped using a POJO MessageResource.java which should be placed either in the package defined in the web.xml or in a sub-package.
-2. The class name should be annoated with @Path("messages")
+2. The class name should be annotated with @Path("messages")
 3. A method returning a String is annotated with the appropriate HTTP method, i.e @GET. 
 Hence when the user requests for http://localhost:8080/001_First_Jersey_Project/webapi/messages, a String is returned as the requested Resource.
 
@@ -345,7 +345,7 @@ The Jersey servlet, init-param package and URL pattern is set for us. This is ea
 2.  Create a new Resource class under the package or subpackage defined in web.xml, i.e the class should be in the package configured in Jersey's servlet's init-param.
 3. Add a method in the class that returns the resource.
 4. Annotate the class with the @Path("messages") annotation
-5. Annoate the method with the right HTTP method annotation.
+5. Annotate the method with the right HTTP method annotation.
 6, Annotate the method with @Produces(MediaType.TEXT_PLAIN) specifying the response format.
 MediaType is an enumeration which contains the media types that an HTTP request may return.
 
@@ -356,6 +356,32 @@ But we get an error while we try to get the messages resources:
 SEVERE: MessageBodyWriter not found for media type=application/xml, type=class java.util.ArrayList, genericType=java.util.List<com.yovan.firstjerseyproject.model.Message>.
 The conversion is done by JAXB, which comes bundled with Java. But JAXB needs more information to perform the conversion.
 => Annotate the class with @XMLRootElement
+
+We add methods for getting a single message by id, creating a new message, updating a message and deleting a message.
+Since we are not using a database, we use a DatabaseConnect class which contains static maps upon which we will perform our CRUD operations on our different entities.
+These static maps representing our entities are accessible anywhere in our apps.
+
+Note: The maps are not thread safe, we used them for testing purposes.
+
+As the maps are static any updates on them will be "persistent" as long as we don't restart the server.
+In the MessageService, in getMessages(), we return a new ArrayList(messagesServiceMap.values())
+We add the methods to perform CRUD operations in our service.
+
+The response of our REST apis can be of different content-types. 
+For example if we want both JSON and XML response:
+@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+
+If we try to get a JSON response, we will get the following error:
+SEVERE: MessageBodyWriter not found for media type=application/json, type=class com.yovan.firstjerseyproject.model.Message, genericType=class com.yovan.firstjerseyproject.model.Message.
+
+As we saw previously JAXB comes with Java for XML support. But there is no support for JSON out-of-the-box in Java.
+We must uncomment the jersey-media-moxy dependency in the pom.xml.
+<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-moxy</artifactId>
+</dependency>
+
+
 
 
 
