@@ -5,3 +5,5 @@ A.
 4. See how to  build and deploy on Tomcat Server.
 5. See Remote Debugging.
 
+6. Our APIs should return both XML and JSON responses.
+

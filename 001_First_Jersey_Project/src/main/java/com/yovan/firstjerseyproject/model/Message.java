@@ -62,4 +62,9 @@ public class Message {
 		this.createdAt = createdAt;
 	}
 
+	@Override
+	public String toString() {
+		return "Message [id=" + id + ", content=" + content + ", author=" + author + ", createdAt=" + createdAt + "]";
+	}
+
 }

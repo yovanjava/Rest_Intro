@@ -2,6 +2,7 @@ package com.yovan.firstjerseyproject;
 
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -20,34 +21,38 @@ public class MessageResource {
 	MessageService messageService = new MessageService();
 
 	@GET
-	@Produces(MediaType.APPLICATION_XML)
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Message> getMessage() {
 		return messageService.getMessages();
 	}
 
 	@GET
-	@Produces(MediaType.APPLICATION_XML)
+	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/{messageId}")
 	public Message getMessage(@PathParam("messageId") long messageId) {
 		return messageService.getMessage(messageId);
 	}
 
 	@POST
-	@Produces(MediaType.APPLICATION_XML)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Message addMessage(Message message) {
-		return message;
+		return messageService.addMessage(message);
 	}
 
 	@PUT
-	@Produces(MediaType.APPLICATION_XML)
-	public Message updateMessage(Message message) {
-		return message;
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{messageId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Message updateMessage(@PathParam("messageId") long messageId, Message message) {
+		message.setId(messageId);
+		return messageService.updateMessage(message);
 	}
 
 	@DELETE
-	@Produces(MediaType.APPLICATION_XML)
-	public Message removeMessage(long messageId) {
-		Message message = null;
-		return message;
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{messageId}")
+	public void removeMessage(@PathParam("messageId") long messageId) {
+		messageService.removeMessage(messageId);
 	}
 }

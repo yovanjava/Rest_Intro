@@ -374,18 +374,69 @@ For example if we want both JSON and XML response:
 If we try to get a JSON response, we will get the following error:
 SEVERE: MessageBodyWriter not found for media type=application/json, type=class com.yovan.firstjerseyproject.model.Message, genericType=class com.yovan.firstjerseyproject.model.Message.
 
-As we saw previously JAXB comes with Java for XML support. But there is no support for JSON out-of-the-box in Java.
+As we saw previously JAXB comes with Java for XML support. 
+But there is no support for JSON out-of-the-box in Java. We must include the necessary jar.
 We must uncomment the jersey-media-moxy dependency in the pom.xml.
 <dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-moxy</artifactId>
 </dependency>
 
+POST
+------
+When posting data, we should also set the content-type of the data sent in the body in the headers.
+Typically the data sent is in JSON format, hence the Content-type is set to application/json.
+
+Suppose we want to create/post a new Message object. Our method in our API
+1. Should be annotated with @POST
+2. and @Produces(MediaType.APPLICATION_JSON)as we will be returning a Message Object as JSON response.
+3. The method has a Message message argument. Jersey converts the JSON request body into a Message instance.
+As the method consumes JSON it should be annotated with
+@Consumes(MediaType.APPLICATION_JSON)
+
+An example of JSON request body: 
+{
+    "author": "yovan",
+    "content": "You should also do your prayers",
+    "createdAt": "2017-01-23T18:50:15.702+04:00"
+}
 
 
+PUT
+----
+When updating a resource, we need pass the id of the resource to the URL as a path parameter.
+PUT /messages/1.
+We don't need to pass the id of our entity in the JSON request body. Jersey will automatically use the path param.
+BUT we must get the path parameter in our API method and set the id of the Message instance to this value while returning it.
+Note: 
+1. In a put we are consuming and producing JSON.
+2. The path is of the format /{messageId}
+3. The method used in an update is PUT
+4. We must pass in the Message instance to be updated and the pathParam attribute.
+5. As we have hardcoded 
 
+@PUT
+@Produces(MediaType.APPLICATION_JSON)
+@Path("/{messageId}")
+@Consumes(MediaType.APPLICATION_JSON)
+public Message updateMessage(@PathParam("messageId") long messageId, Message message) {
+	message.setId(messageId);
+	return messageService.updateMessage(message);
+}
 
+	
+DELETE
+-------
+@DELETE
+@Produces(MediaType.APPLICATION_JSON)
+@Path("/{messageId}")
+public void removeMessage(@PathParam("messageId") long messageId) {
+	messageService.removeMessage(messageId);
+}
 
+We delete a resource by passing its id in the path parameter.
+First of all we create a new resource using POST. This creates a new message resource with id 3. Then we delete it by passing this id as path parameter.
 
+As most of our REST API methods produce/consume JSON, we can place this code above our class definition instead of our method definitions.
 
 
