@@ -1,10 +1,10 @@
 Developing RESTful APIs using the JAX-RS technology
 ===============================================
 We should learn two main things:
-1. Concepts and best practices of  RESTful services
+1. Concepts and best practices of RESTful services
 2. Implementation of RESTful services using JAX-RS
 
-We sill be developing a Messenger - Social media application API.
+We will be developing a Messenger - Social media application API.
 
 What are web services?
 Web services are services exposed on the web to be accessed programmatically -  they are APIs that we can access through our code.
@@ -16,9 +16,9 @@ RESTful services share bare-bone data in XML or JSON format. Developers parse th
 RESTful services are light-weight and use the HTTP protocol.
 
 Characteristics of RESTful services
-1. Use HTTP methods explicitly. There are no protocols. Data can be transtered as text, JSON or XML.
+1. Use HTTP methods explicitly. There are no protocols. Data can be transfered as text, JSON or XML.
 2. Be stateless.
-3. Expose directory structure-like URIs. Resource Locations contain only the core data. - Resouce based URIs. For example weatherapp.com/zipCode/12345.
+3. Expose directory structure-like URIs. Resource Locations contain only the core data. - Resource based URIs. For example weatherapp.com/zipCode/12345.
 4. Transfer XML, JavaScript Object Notation (JSON), or both.
 
 Data is transfered in Hypertext - text containing hyperlinks.
@@ -436,7 +436,15 @@ public void removeMessage(@PathParam("messageId") long messageId) {
 
 We delete a resource by passing its id in the path parameter.
 First of all we create a new resource using POST. This creates a new message resource with id 3. Then we delete it by passing this id as path parameter.
+The delete method returns a status code of 204, i.e No Content.
 
-As most of our REST API methods produce/consume JSON, we can place this code above our class definition instead of our method definitions.
+Note: As most of our REST API methods produce/consume JSON, we can place this code above our class definition instead of our method definitions.
+
+
+ProfileResource
+----------------
+Create a new Service called ProfileService.
+We should change the definition of ProfilesMap from Map<Long, Profile> to Map<String, Profile> in DatabaseConnect.
+This is because the definition of the profile resource is /profiles/{profileName} instead of /profiles/{profileId}.
 
 

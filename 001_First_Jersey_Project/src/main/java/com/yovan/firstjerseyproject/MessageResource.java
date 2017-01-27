@@ -16,41 +16,36 @@ import com.yovan.firstjerseyproject.model.Message;
 import com.yovan.firstjerseyproject.service.MessageService;
 
 @Path("messages")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class MessageResource {
 
 	MessageService messageService = new MessageService();
 
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<Message> getMessage() {
 		return messageService.getMessages();
 	}
 
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/{messageId}")
 	public Message getMessage(@PathParam("messageId") long messageId) {
 		return messageService.getMessage(messageId);
 	}
 
 	@POST
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
 	public Message addMessage(Message message) {
 		return messageService.addMessage(message);
 	}
 
 	@PUT
-	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/{messageId}")
-	@Consumes(MediaType.APPLICATION_JSON)
 	public Message updateMessage(@PathParam("messageId") long messageId, Message message) {
 		message.setId(messageId);
 		return messageService.updateMessage(message);
 	}
 
 	@DELETE
-	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/{messageId}")
 	public void removeMessage(@PathParam("messageId") long messageId) {
 		messageService.removeMessage(messageId);

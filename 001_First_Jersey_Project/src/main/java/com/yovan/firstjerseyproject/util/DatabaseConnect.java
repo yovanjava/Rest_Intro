@@ -9,13 +9,13 @@ import com.yovan.firstjerseyproject.model.Profile;
 public class DatabaseConnect {
 
 	private static Map<Long, Message> messagesMap = new HashMap<>();
-	private static Map<Long, Profile> profilesMap = new HashMap<>();
+	private static Map<String, Profile> profilesMap = new HashMap<>();
 
 	public static Map<Long, Message> getMessages() {
 		return messagesMap;
 	}
 
-	public static Map<Long, Profile> getProfiles() {
+	public static Map<String, Profile> getProfiles() {
 		return profilesMap;
 	}
 
