@@ -7,3 +7,7 @@ A.
 
 6. Our APIs should return both XML and JSON responses.
 
+7.Best and recommended ways to loop over collections like HashMap, Set, ArrayList, etc.
+
+
+

@@ -447,4 +447,14 @@ Create a new Service called ProfileService.
 We should change the definition of ProfilesMap from Map<Long, Profile> to Map<String, Profile> in DatabaseConnect.
 This is because the definition of the profile resource is /profiles/{profileName} instead of /profiles/{profileId}.
 
+Filtering and pagination with Query params
+--------------------------------------------
+We add List<Message> getMessages(int year) and getMessages(int start, int size) to our MessageService.
+Hence we have getMessages(), getMessages(int year) and getMessages(int start, int size) to get all the messages, messages filtered by year and messages paginated respectively.
+
+But we cannot have multiple API signature methods for /messages, /messages?year or /messages?start=x&size=y.
+This is because no matter what we do for example /messages/test=pppp, we will still get go to the method for /messages.
+We can have only one method in our API and filtering is done using @QueryParam("value") Type value.
+
+
 
