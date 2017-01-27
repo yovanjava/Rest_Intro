@@ -500,3 +500,59 @@ Hence instead of returning the response in our MainResource class, we will retur
 6. We have a Map<Long, Comment> commentsMap attribute in the Message class to map the comments of a message instance.
 The getCommentsMap() getter is annotated with @XMLTransient so that the comments are not returned when a message instance is requested (JSON or XML).
 
+Status Codes and Location Headers
+----------------------------------
+1. By default Jersey returns a status code of 200 OK when a new resource is created via POST. Ideally we would like to change the status code to 201 Created.
+2. We would like to send the resource URL as a header: /messages/{newIdCreated} for the new resource created.
+
+1. We should return a new Response Object, created using a ResponseBuilder. 
+The ResponseBuilder Object aids in modifying the headers, status code etc.
+We can set the entity and status code of this Response object as we wanted.
+	public Response addMessage(Message message) {
+		message = messageService.addMessage(message);
+		return Response.status(Status.CREATED)
+				.entity(message)
+				.build();
+	}
+
+2. We want to send the URI in the header for the newly created message.
+We could use the Response.headers(key, value) to set the header, but there is a convenient method for setting both the created status code and the Location of the newly created resource.
+
+The Response.created(uri) is considered a best practice when creating a resource.
+
+	@POST
+	public Response addMessage(Message message) {
+		message = messageService.addMessage(message);
+		try {
+			return Response.created(new URI("/001_First_Jersey_Project/webapi/messages/" + message.getId()))
+					.entity(message)
+					.build();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+As the new URI(String s) returns the Uri only up to the portNumber, we have to provide the "complete" URI string. The method throws an exception, so we have to catch it.
+The above code is messy as we are hard-coding the URL.
+We should inject the UriInfo object using @Context.
+We could use String uri = uriInfo.getAbsolutePath() + "/" + String.valueOf(message.getId());
+This code is messy.
+
+Instead we can use the String uri = uriInfo.getAbsolutePathBuilder().path(message.getId()).build();
+We used the builder pattern and hence can chain several path(String s) methods to create a uri.
+
+	@POST
+	public Response addMessage(Message message, @Context UriInfo uriInfo) {
+		message = messageService.addMessage(message);
+		URI uri = uriInfo.getAbsolutePathBuilder()
+				.path(String.valueOf(message.getId()))
+				.build();
+		return Response.created(uri).entity(message).build();
+	}
+	
+As we are not doing any URI conversion in the above code, we don't throw any exception.
+Hence the above code is clean.
+ 
+Note: The Response object has many convenient status codes.
+Reponse.ok(), Response.modified(), etc.

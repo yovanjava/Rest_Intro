@@ -16,4 +16,8 @@ A.
 10. How to  loop over MultivaluedMap<String, String> multivaluedMap = httpHeaders.getRequestHeaders();
 We used @Context HttpHeaders httpHeaders to get the headers.
 
-11. 
+11. Implement the whole resource/sub-resource paradigm using Hibernate.
+
+12. Implement a file uploader.
+
+
