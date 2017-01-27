@@ -9,5 +9,11 @@ A.
 
 7.Best and recommended ways to loop over collections like HashMap, Set, ArrayList, etc.
 
+8. See examples of @Cookie and @FormParam on net.
 
+9. Implement jwt authentication with HeaderParams.
 
+10. How to  loop over MultivaluedMap<String, String> multivaluedMap = httpHeaders.getRequestHeaders();
+We used @Context HttpHeaders httpHeaders to get the headers.
+
+11. 

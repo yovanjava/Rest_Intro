@@ -23,7 +23,7 @@ public class ProfileResource {
 	ProfileService profileService = new ProfileService();
 
 	@GET
-	public List<Profile> getProfile() {
+	public List<Profile> getProfiles() {
 		return profileService.getProfiles();
 	}
 

@@ -457,4 +457,31 @@ This is because no matter what we do for example /messages/test=pppp, we will st
 We can have only one method in our API and filtering is done using @QueryParam("value") Type value.
 
 
+Other Param Annotations
+------------------
+1. MatrixParams can be sent in the Resource URI like this: /injectdemo?param1=xxx;param2=yyy. 
+The parameters are separated with ; and accessed in the code using @MatrixParam("param1") String param1....
+
+2. Header params are useful when we want to send custom headers, for example for authentication tokens.
+
+3. @CookieParam is used to access cookies.
+
+4. @FormParams are used to send data from an HTML form.
+
+5. When we have a lot of Param annotations, our API method signatures can become very messy.
+We also have to remember the names of our Param attributes.
+Sometimes we do want to send dynamic parameters,and this way of defining our Param attributes jectis very tedious and inefficient.
+
+We can use @Context, @HttpHeader and @BeanParams to lighten our code. 
+
+5.1 @Context attribute can only be used with special types of arguments.
+As we saw before, the param annotations can be used with any primitive values and JAX-RS does the conversion for us.
+But @Context is used with special objects, 
+ - for example @Context UriInfo uriInfo tells JAX-RS to inject the uriInfo object into our method.
+			   @Context HttpHeaders is used to access headers. For example to access different headers,cookies, the MediaType,etc.
+Note: It can also become quite tedious if we use @Context to access multiple attributes defined with @Param annotations.
+
+We should instead use @BeanParam. We define a class whose properties are our @Param attributes and use this custom BeanParam to inject it in our API methods.
+
+
 
