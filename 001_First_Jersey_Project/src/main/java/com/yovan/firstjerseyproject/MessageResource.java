@@ -68,4 +68,19 @@ public class MessageResource {
 	public void removeMessage(@PathParam("messageId") long messageId) {
 		messageService.removeMessage(messageId);
 	}
+	
+	/*@GET
+	@Path("/{messageId}/comments")
+	public List<Comment> getComments(@PathParam("messageId") long messageId){
+		List<Comment> commentsList = new ArrayList<>();
+		return commentsList;
+	}*/
+	
+	@Path("/messagesId/comments")
+	public CommentResource getCommentResource(){
+		return new CommentResource();
+	}
+	
+	
+	
 }

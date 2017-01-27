@@ -1,25 +1,18 @@
 package com.yovan.firstjerseyproject.model;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-
-@XmlRootElement
-public class Message {
+public class Comment {
 
 	private Long id;
 	private String content;
 	private String author;
 	private Date createdAt;
-	private Map<Long, Comment> commentsMap = new HashMap<>();
 
-	public Message() {
+	public Comment() {
 	}
 
-	public Message(Long id, String content, String author, Date createdAt) {
+	public Comment(Long id, String content, String author, Date createdAt) {
 		super();
 		this.id = id;
 		this.content = content;
@@ -27,7 +20,7 @@ public class Message {
 		this.createdAt = createdAt;
 	}
 
-	public Message(String content, String author, Date createdAt) {
+	public Comment(String content, String author, Date createdAt) {
 		super();
 		this.content = content;
 		this.author = author;
@@ -64,20 +57,6 @@ public class Message {
 
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
-	}
-
-	@XmlTransient
-	public Map<Long, Comment> getCommentsMap() {
-		return commentsMap;
-	}
-
-	public void setCommentsMap(Map<Long, Comment> commentsMap) {
-		this.commentsMap = commentsMap;
-	}
-
-	@Override
-	public String toString() {
-		return "Message [id=" + id + ", content=" + content + ", author=" + author + ", createdAt=" + createdAt + "]";
 	}
 
 }

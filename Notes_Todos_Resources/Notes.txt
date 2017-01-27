@@ -483,5 +483,20 @@ Note: It can also become quite tedious if we use @Context to access multiple att
 
 We should instead use @BeanParam. We define a class whose properties are our @Param attributes and use this custom BeanParam to inject it in our API methods.
 
+Comments
+------------
+Comments are not root resources. They depend on messages.
+For example: /messages/{messageId}/comments/{commentId}
 
+We can define our comments resource APIs in the MessageResource class. But this makes our code messy if we have several sub-resources like shares, likes, etc.
+The best way is to define our sub-resources in separate classes, and use the delegate the API calls for these sub-resources in our MainResource.
+Hence instead of returning the response in our MainResource class, we will return an instance to the sub-resource class.
+
+1. We remove the HTTP method annotation.
+2. The method signature of our resource returns a sub-resource.
+3. JAX-RS looks at the URI requested, sees which sub-resource to call and then executes the method with the correct HTTP request annotation.
+4. Note: The class level @Path annotation is optional for sub-resources. We can use @Path("/").
+5. We have access to any @PathParam attributes defined in the MainResource into our subResources.
+6. We have a Map<Long, Comment> commentsMap attribute in the Message class to map the comments of a message instance.
+The getCommentsMap() getter is annotated with @XMLTransient so that the comments are not returned when a message instance is requested (JSON or XML).
 

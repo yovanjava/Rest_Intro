@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Profile {
 
-	private long id;
+	private Long id;
 	private String firstName;
 	private String lastName;
 	private String name;
@@ -14,7 +14,7 @@ public class Profile {
 	public Profile() {
 	}
 
-	public Profile(long id, String firstName, String lastName, String name, Date createdAt, String address) {
+	public Profile(Long id, String firstName, String lastName, String name, Date createdAt, String address) {
 		super();
 		this.id = id;
 		this.firstName = firstName;
@@ -33,11 +33,11 @@ public class Profile {
 		this.address = address;
 	}
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

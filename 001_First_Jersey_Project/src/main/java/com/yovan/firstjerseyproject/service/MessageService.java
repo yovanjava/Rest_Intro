@@ -14,8 +14,8 @@ public class MessageService {
 	private Map<Long, Message> messagesMap = DatabaseConnect.getMessages();
 
 	public MessageService() {
-		messagesMap.put(1L, new Message(1, "This is a new message", "john", new Date()));
-		messagesMap.put(2L, new Message(2, "This is the second message", "paul", new Date()));
+		messagesMap.put(1L, new Message(1L, "This is a new message", "john", new Date()));
+		messagesMap.put(2L, new Message(2L, "This is the second message", "paul", new Date()));
 	}
 
 	public List<Message> getMessages() {
@@ -45,7 +45,7 @@ public class MessageService {
 	}
 
 	public Message addMessage(Message message) {
-		message.setId(messagesMap.size() + 1);
+		message.setId(messagesMap.size() + 1L);
 		messagesMap.put(message.getId(), message);
 		return message;
 	}
