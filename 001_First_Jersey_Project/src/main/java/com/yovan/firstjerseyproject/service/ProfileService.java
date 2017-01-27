@@ -25,7 +25,7 @@ public class ProfileService {
 	}
 
 	public Profile addProfile(Profile profile) {
-		profile.setId(profilesMap.size() + 1);
+		profile.setId(profilesMap.size() + 1L);
 		profilesMap.put(profile.getName(), profile);
 		return profile;
 	}
