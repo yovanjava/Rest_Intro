@@ -1,9 +1,12 @@
 package com.yovan.firstjerseyproject.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -15,6 +18,7 @@ public class Message {
 	private String author;
 	private Date createdAt;
 	private Map<Long, Comment> commentsMap = new HashMap<>();
+	private List<Link> linksList = new ArrayList<>();
 
 	public Message() {
 	}
@@ -73,6 +77,20 @@ public class Message {
 
 	public void setCommentsMap(Map<Long, Comment> commentsMap) {
 		this.commentsMap = commentsMap;
+	}
+
+	 @XmlElement(name = "links")
+	public List<Link> getLinksList() {
+		return linksList;
+	}
+
+	public void setLinksList(List<Link> linksList) {
+		this.linksList = linksList;
+	}
+	
+	public void addLink(String url, String rel) {
+		Link link = new Link(url, rel);
+		linksList.add(link);
 	}
 
 	@Override

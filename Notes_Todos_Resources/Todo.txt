@@ -22,4 +22,8 @@ We used @Context HttpHeaders httpHeaders to get the headers.
 
 13. Get the Java brains source code on github.
 
+14. Use the Jersey Link class to create HATEOS links.
+
+
+
 

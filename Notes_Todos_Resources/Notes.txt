@@ -347,7 +347,7 @@ The Jersey servlet, init-param package and URL pattern is set for us. This is ea
 4. Annotate the class with the @Path("messages") annotation
 5. Annotate the method with the right HTTP method annotation.
 6, Annotate the method with @Produces(MediaType.TEXT_PLAIN) specifying the response format.
-MediaType is an enumeration which contains the media types that an HTTP request may return.
+MediaType is a constant (final static String) which contains the media types that an HTTP request may return.
 
 Our messages Resource should return a list of messages. 
 We will create a mock Service and a model class. We won't  use a database, but we'll mock the data.
@@ -666,3 +666,132 @@ Hence the WebApplicationException subclasses can be used to target all errors.
 HATEOS - Hypermedia as the engine for of application state
 ----------------------------------------------------------
 We would like to make the response navigable. We can access through different resources in the response.
+
+For example if we access the message with id 1, we would like to add links to the resource itself, the profile of the author and the comments.
+
+  {
+    "author": "john",
+    "content": "This is a new message",
+    "createdAt": "2017-01-28T11:07:13.909+04:00",
+    "id": 1,
+    "links": [
+    	{
+    		"link": "http://localhost:8080/001_First_Jersey_Project/webapi/messages/1",
+    		"rel": "self"
+    	},
+    	{
+    		"link": "http://localhost:8080/001_First_Jersey_Project/webapi/profiles/john",
+    		"rel": "profile"
+    	},
+    	{
+    		"link": "http://localhost:8080/001_First_Jersey_Project/webapi/messages/1/comments",
+    		"rel": "comments"
+    	}
+    ]
+  }
+  
+  1. We should add a list of Link objects to our Message class. As Comment, we should not use @XMLRootElement to annotate our class as they are embedded objects in our Message objects.
+  Our Message class contains a linksList properties.
+  We also have a convenience method addLink(String url, String rel) to add link objects to the linksList list.
+  
+  2. In the MessageResource resource handler for getting a message response, we will add the links and send them in the message response.
+  We can generate the self URI using the UriInfo class by using its getAbsolutePathBuilder() method.
+  We have seen that we can use UriBuilder.path("test") to generate a URI of the form /test/. 
+  There is another overloaded method UriBuilder.path(MyResource.class) which returns a URI of the form /myResource/.
+  This is very convenient while generating URI for our resources.
+  The response is:
+ {
+  "author": "john",
+  "content": "This is a new message",
+  "createdAt": "2017-01-28T11:33:27.378+04:00",
+  "id": 1,
+  "links": [
+    {
+      "link": "http://localhost:8080/001_First_Jersey_Project/webapi/messages/1",
+      "rel": "self"
+    }
+  ]
+}
+
+
+Profile link: Same as the self link but we use the ProfileResource to get /profiles/ and the message author.
+
+Comments link:
+
+	private String getCommentsLink(UriInfo uriInfo, Message message) {
+		return uriInfo.getBaseUriBuilder()
+				.path(MessageResource.class)
+				.path(MessageResource.class, "getCommentResource")
+				.path(CommentResource.class)
+				.resolveTemplate("messageId", message.getId())
+				.build()
+				.toString();
+	}
+
+
+1. We cannot directly use the path(CommentResource.class) path to get the path to the comments URI a in the CommentResource class it is mapped to /.
+We should do same as Jersey does to map our URIs. First of all we hit the MessageResource: /messages, then the method getCommentResource to get the CommentsResource:/{messageId}/{commentId}
+After that we access the commentResource to get /comments.
+But as the getCommentResource accepts a messageId parameter. this can be replaced using the resolveTemplate(String toBeReplaced, Long value).
+{
+  "author": "john",
+  "content": "This is a new message",
+  "createdAt": "2017-01-28T11:50:53.507+04:00",
+  "id": 1,
+  "links": [
+    {
+      "link": "http://localhost:8080/001_First_Jersey_Project/webapi/messages/1",
+      "rel": "self"
+    },
+    {
+      "link": "http://localhost:8080/001_First_Jersey_Project/webapi/profiles/john",
+      "rel": "profile"
+    },
+    {
+      "link": "http://localhost:8080/001_First_Jersey_Project/webapi/messages/1/comments/",
+      "rel": "comments"
+    }
+  ]
+}
+
+
+Note: We could use the Link class which comes with Jersey. It has a type and a rel attribute. It uses moxy to convert from object to URIs and is quite buggy.
+This is why we used a custom Link Object.
+
+Content Negotiation
+--------------------
+Content negotiation is a way in which the client can ask the server for a particular content-type in the response and the client can also send content to the server by telling it which content-type it is sending.
+Content negotiation is a conversation between client and server about the content-type of data to be sent or received.
+
+If the server does not support the content-type it returns an error.
+For example if the client is requesting for a JSON response, it must set the "Accept" header to "application/json".
+Our application at this time is supporting only JSON response.
+If we want the server to send an XML response, we set the Accept header to text/xml. But as we are not supporting XML responses, the server returns an error: HTTP Status 406 - Not Acceptable.
+We have to set the @Produces(value = {MediaType.APPLICATION_JSON, MediaType.TEXT_XML}). 
+As we already have the corresponding marshallers and unmarshallers for both JSON and XML, this will work out of the box.
+
+While using JAX-RS we have to annotate our methods with the necessary MediaType. This ensures that we can choose which method to execute when a certain content-type is requested by the client, 
+or which method to execute when the client sends a certain content-type in the request.
+
+As we previously saw, we can annotate with @Produces and @Consumes at both class and method level. Hence we can say which method to execute when a certain content-type is requested by the client - the value set in the Accept header.
+Hence to get the appropriate response format, the client must set the correct Accept header value which will be mapped to the correct method with the appropriate @Produces annotation.
+
+
+If we are doing a PUT or a POST, the client must tell the server what type of data it is sending. It must set the Content-Type header. 
+This is mapped to the appropriate method with the appropriate @Consumes annotation.
+As we are not supporting XML for @Consumes, we get 415 Unsupported Media Type error.
+
+Accepts header tells the server what type of data the client wants to receive and this maps to @Produces on the server side.
+Content-Type header tells the server what type of data the client is sending and this maps to @Consumes on the server side.
+
+
+
+
+
+
+
+
+
+
+
+

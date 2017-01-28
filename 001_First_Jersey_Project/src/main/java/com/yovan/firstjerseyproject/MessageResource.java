@@ -22,6 +22,7 @@ import com.yovan.firstjerseyproject.model.Message;
 import com.yovan.firstjerseyproject.service.MessageService;
 
 @Path("messages")
+//@Produces(value = {MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class MessageResource {
@@ -42,7 +43,20 @@ public class MessageResource {
 	 */
 
 	@GET
-	public List<Message> getMessages(@BeanParam MessagesBeanParams beanParams) {
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Message> getMessagesJson(@BeanParam MessagesBeanParams beanParams) {
+		System.out.println("JSON requested");
+		if (beanParams.getYear() > 0)
+			return messageService.getMessages(beanParams.getYear());
+		if (beanParams.getStart() >= 0 && beanParams.getSize() > 0)
+			return messageService.getMessages(beanParams.getStart(), beanParams.getSize());
+		return messageService.getMessages();
+	}
+	
+	@GET
+	@Produces(MediaType.TEXT_XML)
+	public List<Message> getMessagesXML(@BeanParam MessagesBeanParams beanParams) {
+		System.out.println("XML requested");
 		if (beanParams.getYear() > 0)
 			return messageService.getMessages(beanParams.getYear());
 		if (beanParams.getStart() >= 0 && beanParams.getSize() > 0)
@@ -52,8 +66,39 @@ public class MessageResource {
 
 	@GET
 	@Path("/{messageId}")
-	public Message getMessage(@PathParam("messageId") long messageId) {
-		return messageService.getMessage(messageId);
+	public Message getMessage(@PathParam("messageId") long messageId, @Context UriInfo uriInfo) {
+		Message message = messageService.getMessage(messageId);
+		message.addLink(getSelfLink(uriInfo, message), "self");
+		message.addLink(getProfileLink(uriInfo, message), "profile");
+		message.addLink(getCommentsLink(uriInfo, message), "comments");
+		return message;
+	}
+
+	private String getSelfLink(UriInfo uriInfo, Message message) {
+		String uri = uriInfo.getBaseUriBuilder()
+				.path(MessageResource.class)
+				.path(Long.toString(message.getId()))
+				.build()
+				.toString();
+		return uri;
+	}
+	
+	private String getProfileLink(UriInfo uriInfo, Message message) {
+		return uriInfo.getBaseUriBuilder()
+				.path(ProfileResource.class)
+				.path(message.getAuthor())
+				.build()
+				.toString();
+	}
+	
+	private String getCommentsLink(UriInfo uriInfo, Message message) {
+		return uriInfo.getBaseUriBuilder()
+				.path(MessageResource.class)
+				.path(MessageResource.class, "getCommentResource")
+				.path(CommentResource.class)
+				.resolveTemplate("messageId", message.getId())
+				.build()
+				.toString();
 	}
 
 	/*
@@ -105,7 +150,7 @@ public class MessageResource {
 	 * commentsList = new ArrayList<>(); return commentsList; }
 	 */
 
-	@Path("/{messagesId}/comments")
+	@Path("/{messageId}/comments")
 	public CommentResource getCommentResource() {
 		return new CommentResource();
 	}
