@@ -105,7 +105,7 @@ public class MessageResource {
 	 * commentsList = new ArrayList<>(); return commentsList; }
 	 */
 
-	@Path("/messagesId/comments")
+	@Path("/{messagesId}/comments")
 	public CommentResource getCommentResource() {
 		return new CommentResource();
 	}
