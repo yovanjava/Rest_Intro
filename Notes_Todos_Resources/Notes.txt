@@ -628,7 +628,7 @@ WebApplicationException
 JAX-RS does not know what type of exceptions our applications may throw. This is where our ExceptionMapper classes become very important, so that we can return a JSON response when an exception is thrown.
 But there are some exceptions that JAX-RS knows about and hence can handle it itself - no ExceptionMapper classes are required for these exceptions.
 
-As the GenericExceptionMapper class catches all exceptions, we disable it by removing the @Provider annotation.
+Important: As the GenericExceptionMapper class catches all exceptions, we disable it by removing the @Provider annotation.
 
 	public Comment getComment(Long messageId, Long commentId) {
 		Map<Long, Comment> commentsMap = messagesMap.get(messageId).getCommentsMap();
@@ -639,6 +639,30 @@ In the CommentService, the getComment(messageId, commentId) many things can go w
 1. As we are trying to get the commentsMap from the messagesMap, if the messageId does not exist, a null pointer exception will be thrown.
 2. If the commentId does not exist, the method will return null.
 
+1. We can throw a new WebApplicationException(Status.NOT_FOUND) if the message or comment object is null.
+If we try to access a non-existant messageId or commentId, the status is 404 Not Found as expected, but the response is still the default Tomcat error page.
+We should also send the errorMessage as an entity to the Response object.
 
+Now if we access http://localhost:8080/001_First_Jersey_Project/webapi/messages/101/comments/5 via postman, we get the following JSON response with the status code 404.
+{
+  "documentation": "http://yovan.com/ErrorMessage",
+  "errorCode": 404,
+  "errorMessage": "Not Found"
+}
 
+As we have put all the error handling code, using WebApplicationException in the commentService, this is not a good approach.
+ 
+Note: There are several subclasses which inherit from WebApplicationException, which themselves have subclasses, hence we can fine tune our responses to be more specific.
+ClientErrorException: 400-499 error codes
+	subclasses: BadRequestException, ForbiddenException, NotAcceptableException, NotAllowedExcetion, NotAuthorizedException, NotFoundException, NotSupportedException
+REdirectionErrorException: 300-399
+ServerErrorException: 500-599
 
+For example in our case we can use NotFoundException(Response response).
+We don't need to set the status code, hence using NotFoundException is cleaner.
+
+Hence the WebApplicationException subclasses can be used to target all errors.
+
+HATEOS - Hypermedia as the engine for of application state
+----------------------------------------------------------
+We would like to make the response navigable. We can access through different resources in the response.

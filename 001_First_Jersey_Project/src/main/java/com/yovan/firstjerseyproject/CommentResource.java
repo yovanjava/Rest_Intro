@@ -52,5 +52,4 @@ public class CommentResource {
 		commentService.removeComment(messageId, commentId);
 	}
 	
-	
 }
