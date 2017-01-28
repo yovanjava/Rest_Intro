@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.yovan.firstjerseyproject.exception.DataNotFoundException;
 import com.yovan.firstjerseyproject.model.Message;
 import com.yovan.firstjerseyproject.util.DatabaseConnect;
 
@@ -41,7 +42,10 @@ public class MessageService {
 	}
 
 	public Message getMessage(Long id) {
-		return messagesMap.get(id);
+		Message message = messagesMap.get(id);
+		if(message == null)
+			throw new DataNotFoundException("The message id " + id + " does not exist");
+		return message;
 	}
 
 	public Message addMessage(Message message) {

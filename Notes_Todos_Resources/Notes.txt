@@ -555,4 +555,76 @@ As we are not doing any URI conversion in the above code, we don't throw any exc
 Hence the above code is clean.
  
 Note: The Response object has many convenient status codes.
-Reponse.ok(), Response.modified(), etc.
+Response.ok(), Response.modified(), etc.
+
+Handling Exceptions
+---------------------
+If an error occurs, the response by default returns the Tomcat error page.
+We would like to send custom error responses, for example status code in JSON format.
+
+	public Message getMessage(Long id) {
+		return messagesMap.get(id);
+	}
+		
+In the above code in MessageService, if the messageId does not exist, the response is null. 
+Note: getting a value from a map with a non-existing key returns null.
+We get a 204 No content as the response is null.
+
+We create a class DataNotFoundException extends RuntimeException.
+In the getMessage(Long id) method, we test whether the message is null and throw an exception.
+For example if we query for a non-existing message: http://localhost:8080/001_First_Jersey_Project/webapi/messages/4,
+the exception is thrown. But we get the Tomcat's error page.
+
+Explanation of why we get the Tomcat's error page:
+An exception is thrown in the MessageService and the MessageResource does not catch the Exception.
+This exception continues to bubble up, JAX-RS does not handle it. The error goes up to the Tomcat Servlet container.
+The Servlet container has some defaults when exceptions bubble up - Show Tomcat error page for Exceptions. 
+But we don't want to send back this Tomcat error page as HTML response.
+We want to create a JSON payload when an exception is thrown.
+We must intercept the bubbling of the exception. The service throws an exception to the resource handler and the resource handler throws it to the framework.
+We must intercept the exception at the framework level by catching it and the framework returns the JSON response.
+
+1. Prepare the JSON exception response.
+2. Map the JSON response to the exception so that Jersey knows that this JSON response should be returned when an exception is thrown.
+This is analogous to mapping a URL to a response using @Path.
+This JSON object will contain information about the error. The end user being a programmer, the error message may contain information about how to handle/troubleshoot the error message.
+
+The ErrorMessage entity is like any other model entity and can be returned as a JSON response.
+Note:
+1. errorMessage will contain the error message.
+2. errorCode is a custom error code proper to our API, not only limited to the HTML error codes. This gives us much flexibility.
+3. documentation is a link to our online documentation, which can help developers troubleshoot the error.
+4. The default constructor is necessary for serializing and deserializing JSON.
+5. We must annotate the ErrorMessage class with @XMLRootElement so that the instances can be converted to JSON.
+
+We must map the ErrorMessage class to the Response. The way to map exceptions to responses in JAX-RS is using a class called ExceptionMapper.
+1. Create a class called DataNotFoundExceptionMapper implements ExceptionMapper.
+2. Exception mapper is a generic type. We must set its type to the exception we want to throw: DataNotFoundException
+3. Our DataNotFoundExceptionMapper class must implement Response toResponse(DataNotFoundException exception) method.
+This method has a DataNotFoundException argument, which is the exception thrown by our code.
+4. This exception is used to construct a Response object, so that when an exception is thrown, it does not bubble up and returned as a Response.
+5. For testing purposes we just return a Response with a status code of NOT_FOUND, using the response builder.
+6. We must annotate our class with @Provider. This registers our class so that JAX-RS knows that it exists.
+Important: We must restart Tomcat when we register a class for JAX-RS.
+
+When a exception is thrown in our service, the service throws the error to our response handler, which throws it to the JAX-RS framework.
+JAX-RS sees this exception and searches for any ExceptionMapper for this particular exception.
+If JAX-RS finds an ExceptionMapper, it passes the particular exception to the toResponse(Exception ex) method, which returns as JSON response to our response handler.
+
+If we try to access a message resource with a non-existent id, we get a 404 Not Found status.
+But the HTML content is still the default Tomcat error page. 
+We must send some content with our response. This content is an instance of ErrorMessage which contains the message, error code and documentation link.
+
+Note: We can create several ExceptionMapper classes for all the errors that can be thrown. For example for a non-existing uri: /notexists.
+This ensures that we do not get the default Tomcat's page.
+
+But we can also create a GenericExceptionMapper, which handles any exceptions that have not been defined in our code, so that no matter what exception is thrown, we get a JSON response and not the Tomcat default page.
+GenericExceptionMapper implements ExceptionMapper<Throwable> which ensures that no matter what exception is thrown, it is catched in this class.
+The error code sent is 500 INTERNAL_SERVER_ERROR.
+Important: We must restart Tomcat as we have registered a new ExceptionMapper class.
+
+
+
+
+
+
